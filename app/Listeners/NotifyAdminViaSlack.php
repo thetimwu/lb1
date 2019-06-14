@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\App\Listeners;
+namespace App\Listeners;
 
 use App\Events\NewCustomerHasRegisteredEvent;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,6 +26,7 @@ class NotifyAdminViaSlack
      */
     public function handle(NewCustomerHasRegisteredEvent $event)
     {
+        //sleep(1000);
         dump('Slack message here');
     }
 }

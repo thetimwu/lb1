@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\App\Listeners;
+namespace App\Listeners;
 
 use App\Events\NewCustomerHasRegisteredEvent;
 use Illuminate\Queue\InteractsWithQueue;

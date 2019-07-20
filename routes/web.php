@@ -23,15 +23,15 @@ Route::view('about', 'about')->middleware('test');
 Route::get('contact', 'ContactFormController@create')->name('contact.create');
 Route::post('contact', 'ContactFormController@store')->name('contact.store');
 
-// Route::get('customers', 'CustomersController@index');
-// Route::post('customers', 'CustomersController@store');
-// Route::get('customers/create', 'CustomersController@create');
-// Route::get('customers/{customer}', 'CustomersController@show');
-// Route::patch('customers/{customer}', 'CustomersController@update');
-// Route::get('customers/{customer}/edit', 'CustomersController@edit');
-// Route::delete('customers/{customer}', 'CustomersController@destroy');
+Route::get('customers', 'CustomersController@index')->name('customers.index');
+Route::post('customers', 'CustomersController@store')->name('customers.store');
+Route::get('customers/create', 'CustomersController@create')->name('customers.create');
+Route::get('customers/{customer}', 'CustomersController@show')->name('customers.show')->middleware('can:view,customer');
+Route::patch('customers/{customer}', 'CustomersController@update')->name('customers.update');
+Route::get('customers/{customer}/edit', 'CustomersController@edit')->name('customers.edit');
+Route::delete('customers/{customer}', 'CustomersController@destroy')->name('customers.destroy');
 
-Route::resource('customers', 'CustomersController'); //->middleware('auth');
+//Route::resource('customers', 'CustomersController'); //->middleware('auth');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index');

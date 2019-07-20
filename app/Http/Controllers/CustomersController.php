@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeNewUserMail;
 use App\Events\NewCustomerHasRegisteredEvent;
+use Intervention\Image\Facades\Image;
 
 class CustomersController extends Controller
 {
@@ -20,7 +21,10 @@ class CustomersController extends Controller
 
     public function index() {
 
-        $customers = Customer::all();
+        //$customers = Customer::all();
+
+        $customers = Customer::with('company')->paginate(5);
+
         // $activeCustomers = Customer::active()->get();
         // $inactiveCustomers = Customer::inactive()->get();
         
@@ -42,6 +46,7 @@ class CustomersController extends Controller
 
     public function store() {
 
+        $this->authorize('create', Customer::class);
         //dd($data);
         $customer = Customer::create($this->validateRequest());
         //$customer = new Customer();
@@ -51,6 +56,8 @@ class CustomersController extends Controller
         // $customer->save();
         // return back();
         //dd(request('name'));
+
+        $this->storeImage($customer);
 
         event(new NewCustomerHasRegisteredEvent($customer));
         
@@ -80,20 +87,58 @@ class CustomersController extends Controller
      
         $customer->update($this->validateRequest());
 
+        $this->storeImage($customer);
+
         return redirect('customers/' . $customer->id);
     }
 
     private function validateRequest() {
-        return request()->validate([
+        return tap(request()->validate([
             'name' => 'required|min:3',
             'email' => 'required|email',
             'active' => 'required',
             'company_id' => 'required',
-        ]);    
+        ]), function() {
+            if (request()->hasFile('image')) {
+                request()->validate([
+                    'image' => 'file|image|max:5000',
+                ]);
+            }
+        });
+
+        //  $validatedData = request()->validate([
+        //     'name' => 'required|min:3',
+        //     'email' => 'required|email',
+        //     'active' => 'required',
+        //     'company_id' => 'required',
+        // ]);  
+
+        // if (request()->hasFile('image')) {
+        //     request()->validate([
+        //         'image' => 'file|image|max:5000',
+        //     ]);
+        // }
+
+        // return $validatedData;
+    }
+
+    private function storeImage($customer)
+    {
+        if (request()->has('image'))
+        {
+            $customer->update([
+                'image' => request()->image->store('uploads', 'public'),            
+            ]);
+
+            // composer require intervention/image
+            $image = Image::make(public_path('storage/' . $customer->image))->fit(300, 300);
+            $image->save();
+        }
     }
 
     public function destroy(Customer $customer)
     {
+        $this->authorize('delete', $customer);
         //dd($customer);
         $customer->delete();
 
